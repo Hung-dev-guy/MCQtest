@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#063a4d" />
+    <title>Ôn tập Mạng máy tính</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section id="loading" class="loading" aria-live="polite">Đang chuẩn bị câu hỏi…</section>
+      <section id="app" hidden>
+        <header class="masthead">
+          <a class="brand" href="/" aria-label="Về đầu bài"><span class="brand-mark">↯</span> Mạng máy tính</a>
+          <div class="progress-wrap">
+            <div class="progress-label"><span id="progress-copy">Câu 1 / 484</span><span id="answered-copy">0 đã chọn</span></div>
+            <div class="track" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
+          </div>
+        </header>
+
+        <section class="exam" aria-labelledby="question-number">
+          <p id="question-number" class="question-index">Câu 1</p>
+          <h1 id="stem"></h1>
+          <fieldset id="choices" class="choices">
+            <legend class="sr-only">Chọn một đáp án</legend>
+          </fieldset>
+          <div class="report-row"><button class="text-button" id="report-button" type="button">Báo lỗi câu này</button><span id="save-status" role="status"></span></div>
+        </section>
+
+        <footer class="controls">
+          <button id="previous" class="secondary" type="button">← Câu trước</button>
+          <div class="jump"><label for="jump-to">Đến câu</label><input id="jump-to" type="number" min="1" inputmode="numeric" /><button id="jump-button" type="button">Đi</button></div>
+          <button id="next" class="primary" type="button">Câu tiếp →</button>
+        </footer>
+        <div class="submit-wrap"><button id="submit" class="submit" type="button">Nộp bài</button></div>
+      </section>
+    </main>
+
+    <dialog id="report-dialog">
+      <form method="dialog" id="report-form">
+        <button class="close" value="cancel" aria-label="Đóng">×</button>
+        <p class="dialog-kicker">Báo lỗi câu <span id="report-question"></span></p>
+        <h2>Câu hỏi có vấn đề gì?</h2>
+        <label for="report-detail">Mô tả ngắn <span>(không bắt buộc)</span></label>
+        <textarea id="report-detail" rows="4" placeholder="Ví dụ: đáp án chưa chính xác, câu hỏi khó hiểu…"></textarea>
+        <button id="send-report" class="primary" value="send" type="submit">Gửi báo lỗi</button>
+      </form>
+    </dialog>
+
+    <dialog id="result-dialog">
+      <form method="dialog">
+        <p class="dialog-kicker">Kết quả làm bài</p>
+        <h2 id="result-title"></h2>
+        <p id="result-copy"></p>
+        <button class="primary" value="close" type="submit">Xem lại bài làm</button>
+      </form>
+    </dialog>
+    <script src="/config.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
