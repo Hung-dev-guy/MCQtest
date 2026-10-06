@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#063a4d" />
+    <title>Báo lỗi câu hỏi · Mạng máy tính</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Spectral:wght@600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell admin-shell">
+      <header class="admin-header">
+        <a class="brand" href="/"><span class="brand-mark">↯</span> Mạng máy tính</a>
+        <a class="back-link" href="/">← Về trang làm bài</a>
+      </header>
+
+      <section id="access-card" class="admin-card" aria-labelledby="access-title">
+        <p class="dialog-kicker">Khu vực quản trị</p>
+        <h1 id="access-title">Các câu cần rà soát</h1>
+        <p>Nhập khóa quản trị để xem báo lỗi từ sinh viên. Khóa chỉ được giữ trong phiên trình duyệt này.</p>
+        <form id="access-form" class="access-form">
+          <label for="admin-key">Khóa quản trị</label>
+          <div class="access-row"><input id="admin-key" type="password" autocomplete="current-password" required /><button class="primary" type="submit">Mở danh sách</button></div>
+          <p id="access-status" class="form-status" role="status"></p>
+        </form>
+      </section>
+
+      <section id="reports-panel" hidden aria-labelledby="reports-title">
+        <div class="reports-topline">
+          <div><p class="dialog-kicker">Báo lỗi đã gửi</p><h1 id="reports-title">Rà soát câu hỏi</h1></div>
+          <button id="refresh-reports" class="secondary" type="button">Tải lại</button>
+        </div>
+        <div class="report-tools"><label for="report-filter">Lọc</label><input id="report-filter" type="search" placeholder="Số câu hoặc nội dung…" /></div>
+        <p id="reports-summary" class="reports-summary" aria-live="polite"></p>
+        <div id="reports-list" class="reports-list"></div>
+      </section>
+    </main>
+    <script src="/reports.js"></script>
+  </body>
+</html>

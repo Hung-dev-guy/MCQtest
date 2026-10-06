@@ -19,6 +19,7 @@
           <div class="progress-wrap">
             <div class="progress-label"><span id="progress-copy">Câu 1 / 484</span><span id="answered-copy">0 đã chọn</span></div>
             <div class="track" aria-hidden="true"><div id="progress-bar" class="progress-bar"></div></div>
+            <button id="review-button" class="review-button" type="button">Đọc lại bài làm</button>
           </div>
         </header>
 
@@ -28,6 +29,7 @@
           <fieldset id="choices" class="choices">
             <legend class="sr-only">Chọn một đáp án</legend>
           </fieldset>
+          <div id="answer-feedback" class="answer-feedback" hidden role="status"></div>
           <div class="report-row"><button class="text-button" id="report-button" type="button">Báo lỗi câu này</button><span id="save-status" role="status"></span></div>
         </section>
 
@@ -42,7 +44,7 @@
 
     <dialog id="report-dialog">
       <form method="dialog" id="report-form">
-        <button class="close" value="cancel" aria-label="Đóng">×</button>
+        <button class="close" id="close-report" type="button" aria-label="Đóng">×</button>
         <p class="dialog-kicker">Báo lỗi câu <span id="report-question"></span></p>
         <h2>Câu hỏi có vấn đề gì?</h2>
         <label for="report-detail">Mô tả ngắn <span>(không bắt buộc)</span></label>
@@ -56,10 +58,19 @@
         <p class="dialog-kicker">Kết quả làm bài</p>
         <h2 id="result-title"></h2>
         <p id="result-copy"></p>
-        <button class="primary" value="close" type="submit">Xem lại bài làm</button>
+        <button id="result-review" class="primary" type="button">Đọc lại bài làm</button>
+        <button class="secondary dialog-close" value="close" type="submit">Đóng</button>
       </form>
     </dialog>
-    <script src="/config.js"></script>
+    <dialog id="review-dialog">
+      <form method="dialog">
+        <button class="close" value="close" aria-label="Đóng">×</button>
+        <p class="dialog-kicker">Đọc lại bài làm</p>
+        <h2>Chọn câu để xem lại</h2>
+        <p id="review-summary"></p>
+        <div id="review-grid" class="review-grid" aria-label="Danh sách câu hỏi"></div>
+      </form>
+    </dialog>
     <script src="/app.js"></script>
   </body>
 </html>
