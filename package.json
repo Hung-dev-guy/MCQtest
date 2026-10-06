@@ -6,6 +6,6 @@
     "check": "node build.js"
   },
   "dependencies": {
-    "@vercel/blob": "^2.3.0"
+    "@neondatabase/serverless": "^1.0.0"
   }
 }

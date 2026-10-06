@@ -9,6 +9,18 @@ function shuffledOptions(question) {
 }
 function saveAnswers() { localStorage.setItem('compnet-answers', JSON.stringify(state.answers)); }
 function answerText(question, answer) { return [question.correct, ...question.distractors][answer]; }
+function pendingReports() { try { return JSON.parse(localStorage.getItem('compnet-pending-reports') || '[]'); } catch { return []; } }
+function savePendingReports(reports) { localStorage.setItem('compnet-pending-reports', JSON.stringify(reports)); }
+async function sendReport(report) {
+  const response = await fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(report) });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || 'Chưa gửi được báo lỗi. Vui lòng thử lại sau.');
+}
+async function retryPendingReports() {
+  const remaining = [];
+  for (const report of pendingReports()) { try { await sendReport(report); } catch { remaining.push(report); } }
+  savePendingReports(remaining);
+}
 function render() {
   const question = state.questions[state.index];
   const answer = state.answers[question.id];
@@ -53,20 +65,21 @@ $('#choices').addEventListener('change', event => {
 $('#previous').addEventListener('click', () => goTo(state.index - 1));
 $('#next').addEventListener('click', () => goTo(state.index + 1));
 $('#jump-button').addEventListener('click', () => { const number = Number($('#jump-to').value); if (number >= 1 && number <= state.questions.length) goTo(number - 1); });
-$('#report-button').addEventListener('click', () => { $('#report-question').textContent = state.questions[state.index].id; $('#report-detail').value = ''; $('#report-dialog').showModal(); });
+$('#report-button').addEventListener('click', () => { $('#report-question').textContent = state.questions[state.index].id; $('#report-detail').value = ''; $('#report-status').textContent = ''; $('#report-dialog').showModal(); });
 $('#close-report').addEventListener('click', () => $('#report-dialog').close());
 $('#report-form').addEventListener('submit', async event => {
   event.preventDefault();
   if (event.submitter.value !== 'send') return;
   const question = state.questions[state.index];
   const button = $('#send-report');
+  const report = { questionId: question.id, stem: question.stem, selectedAnswer: state.answers[question.id] === undefined ? null : answerText(question, state.answers[question.id]), correctAnswer: question.correct, detail: $('#report-detail').value };
   button.disabled = true; button.textContent = 'Đang gửi…';
   try {
-    const response = await fetch('/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ questionId: question.id, stem: question.stem, selectedAnswer: state.answers[question.id] === undefined ? null : answerText(question, state.answers[question.id]), correctAnswer: question.correct, detail: $('#report-detail').value }) });
-    if (!response.ok) throw new Error();
+    await sendReport(report);
     $('#report-dialog').close(); $('#save-status').textContent = 'Đã gửi báo lỗi. Cảm ơn bạn.';
-  } catch {
-    $('#report-detail').setCustomValidity('Chưa gửi được báo lỗi. Vui lòng thử lại sau.'); $('#report-detail').reportValidity();
+  } catch (error) {
+    const queued = pendingReports(); queued.push(report); savePendingReports(queued);
+    $('#report-status').textContent = `${error.message} Nội dung đã được lưu tạm trên thiết bị này.`;
   } finally {
     button.disabled = false; button.textContent = 'Gửi báo lỗi';
   }
@@ -98,4 +111,4 @@ $('#review-grid').addEventListener('click', event => {
   $('#review-dialog').close(); goTo(Number(button.dataset.question) - 1);
 });
 
-fetch('/questions.json').then(response => { if (!response.ok) throw new Error(); return response.json(); }).then(questions => { state.questions = questions; const requested = Number(new URLSearchParams(location.search).get('q')); if (requested >= 1 && requested <= questions.length) state.index = requested - 1; $('#loading').hidden = true; $('#app').hidden = false; render(); }).catch(() => { $('#loading').textContent = 'Không tải được câu hỏi. Vui lòng thử lại.'; });
+fetch('/questions.json').then(response => { if (!response.ok) throw new Error(); return response.json(); }).then(questions => { state.questions = questions; const requested = Number(new URLSearchParams(location.search).get('q')); if (requested >= 1 && requested <= questions.length) state.index = requested - 1; $('#loading').hidden = true; $('#app').hidden = false; render(); retryPendingReports(); }).catch(() => { $('#loading').textContent = 'Không tải được câu hỏi. Vui lòng thử lại.'; });

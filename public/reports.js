@@ -10,10 +10,11 @@ function node(tag, text, className) {
 function formatDate(value) { return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)); }
 function groupedReports() {
   const filter = $('#report-filter').value.trim().toLocaleLowerCase('vi');
+  const selectedStatus = $('#report-status-filter').value;
   const groups = new Map();
   state.reports.forEach(report => {
-    const searchable = `${report.questionId} ${report.stem} ${report.detail}`.toLocaleLowerCase('vi');
-    if (filter && !searchable.includes(filter)) return;
+    const searchable = `${report.questionId} ${report.stem} ${report.detail} ${report.reviewNote || ''}`.toLocaleLowerCase('vi');
+    if ((filter && !searchable.includes(filter)) || (selectedStatus !== 'all' && report.status !== selectedStatus)) return;
     const group = groups.get(report.questionId) || [];
     group.push(report); groups.set(report.questionId, group);
   });
@@ -33,7 +34,13 @@ function renderReports() {
     const details = node('div', '', 'report-details');
     reports.forEach(report => {
       const item = node('div', '', 'report-detail');
-      item.append(node('strong', formatDate(report.reportedAt)), node('p', report.detail || 'Không có mô tả.'), node('p', `Đáp án sinh viên chọn: ${report.selectedAnswer || 'Chưa chọn'}`, 'muted-copy'));
+      const status = node('span', report.status === 'resolved' ? 'Đã xử lý' : 'Chưa xử lý', `report-status ${report.status}`);
+      const action = node('button', report.status === 'resolved' ? 'Mở lại' : 'Đánh dấu đã xử lý', 'report-action');
+      action.type = 'button';
+      action.addEventListener('click', () => updateReport(report, report.status === 'resolved' ? 'open' : 'resolved'));
+      item.append(node('strong', formatDate(report.reportedAt)), status, node('p', report.detail || 'Không có mô tả.'), node('p', `Đáp án sinh viên chọn: ${report.selectedAnswer || 'Chưa chọn'}`, 'muted-copy'));
+      if (report.reviewNote) item.append(node('p', `Ghi chú: ${report.reviewNote}`, 'review-note'));
+      item.append(action);
       details.append(item);
     });
     const link = node('a', 'Mở câu để rà soát →', 'report-link');
@@ -41,13 +48,20 @@ function renderReports() {
     card.append(details, link); $('#reports-list').append(card);
   });
 }
+async function updateReport(report, status) {
+  const response = await fetch('/api/reports', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.key}` }, body: JSON.stringify({ id: report.id, status, reviewNote: report.reviewNote || '' }) });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) return alert(payload.error || 'Chưa cập nhật được trạng thái.');
+  state.reports = state.reports.map(item => item.id === payload.id ? payload : item); renderReports();
+}
 async function loadReports() {
   $('#refresh-reports').disabled = true;
   try {
     const response = await fetch('/api/reports', { headers: { Authorization: `Bearer ${state.key}` } });
+    const payload = await response.json().catch(() => ({}));
     if (response.status === 401) throw new Error('Khóa quản trị không đúng.');
-    if (!response.ok) throw new Error('Chưa tải được báo lỗi. Vui lòng thử lại.');
-    state.reports = await response.json(); $('#access-status').textContent = ''; renderReports(); return true;
+    if (!response.ok) throw new Error(payload.error || 'Chưa tải được báo lỗi. Vui lòng thử lại.');
+    state.reports = payload; $('#access-status').textContent = ''; renderReports(); return true;
   } catch (error) {
     $('#access-status').textContent = error.message;
     $('#reports-panel').hidden = true; $('#access-card').hidden = false;
@@ -61,3 +75,4 @@ $('#access-form').addEventListener('submit', async event => {
 });
 $('#refresh-reports').addEventListener('click', loadReports);
 $('#report-filter').addEventListener('input', renderReports);
+$('#report-status-filter').addEventListener('change', renderReports);
